@@ -15,7 +15,7 @@ from world_canvas_msgs.msg import Annotation, AnnotationData
 from world_canvas_utils.serialization import *
 
 
-def read(file):
+def read(file, world):
     yaml_data = None 
     with open(file) as f:
        yaml_data = yaml.load(f)
@@ -29,10 +29,9 @@ def read(file):
         ann.data_id = unique_id.toMsg(unique_id.fromRandom())
         ann.id = unique_id.toMsg(unique_id.fromRandom())
         ann.world = world
-        ann.name = t['name']
+        ann.name = "marker " + str(t['id'])
         ann.type = 'ar_track_alvar_msgs/AlvarMarker'
-        for i in range(0, random.randint(0,11)):
-            ann.keywords.append('kw'+str(random.randint(1,11)))
+        ann.keywords.append(str(world))
         # if 'prev_id' in vars():
         #     ann.relationships.append(prev_id)
         # prev_id = ann.id
@@ -44,18 +43,18 @@ def read(file):
         ann.size.x = 0.18
         ann.size.y = 0.18
         ann.size.z = 0.01
-        ann.pose.header.frame_id = t['frame_id']
+        ann.pose.header.frame_id = t['pose']['header']['frame_id']
         ann.pose.header.stamp = rospy.Time.now()
-        ann.pose.pose.pose = message_converter.convert_dictionary_to_ros_message('geometry_msgs/Pose',t['pose'])
+        ann.pose.pose.pose = message_converter.convert_dictionary_to_ros_message('geometry_msgs/Pose',t['pose']['pose'])
 
         anns_list.append(ann)
         
         object = AlvarMarker()
         object.id = t['id']
         object.confidence = t['confidence']
-        object.pose.header.frame_id = t['frame_id']
+        object.pose.header.frame_id = t['pose']['header']['frame_id']
         object.pose.header.stamp = rospy.Time.now()
-        object.pose.pose = message_converter.convert_dictionary_to_ros_message('geometry_msgs/Pose',t['pose'])
+        object.pose.pose = message_converter.convert_dictionary_to_ros_message('geometry_msgs/Pose',t['pose']['pose'])
         data = AnnotationData()
         data.id = ann.data_id
         data.type = ann.type
@@ -71,7 +70,6 @@ if __name__ == '__main__':
     rospy.init_node('markers_saver')
     world = rospy.get_param('~world')
     file  = rospy.get_param('~file')
-    anns, data = read(file)
 
     rospy.loginfo("Waiting for save_annotations_data service...")
     rospy.wait_for_service('save_annotations_data')

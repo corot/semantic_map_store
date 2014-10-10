@@ -58,7 +58,9 @@ if __name__ == '__main__':
     file     = rospy.get_param('~file')
     world    = rospy.get_param('~world')
     map_name = rospy.get_param('~map_name')
+    rospy.loginfo("Reading file")
     ann, map = read(file)
+    rospy.loginfo("Done reading file")
 
     rospy.loginfo("Waiting for save_annotations_data service...")
     rospy.wait_for_service('save_annotations_data')
