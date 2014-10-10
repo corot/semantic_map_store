@@ -15,7 +15,7 @@ from world_canvas_msgs.msg import Annotation, AnnotationData
 from world_canvas_utils.serialization import *
 
 
-def read(file, world, map_name):
+def read(file, world):
     yaml_data = None 
     with open(file) as f:
        yaml_data = yaml.load(f)
@@ -32,7 +32,6 @@ def read(file, world, map_name):
         ann.name = t['name']
         ann.type = 'yocs_msgs/Table'
         ann.keywords.append(str(world))
-        ann.keywords.append(str(map_name))
         if 'prev_id' in vars():
             ann.relationships.append(prev_id)
         prev_id = ann.id
@@ -74,8 +73,7 @@ if __name__ == '__main__':
     rospy.init_node('tables_saver')
     world = rospy.get_param('~world')
     file  = rospy.get_param('~file')
-    map_name = rospy.get_param('~map_name')
-    anns, data = read(file, world, map_name)
+    anns, data = read(file, world)
 
     rospy.loginfo("Waiting for save_annotations_data service...")
     rospy.wait_for_service('save_annotations_data')
